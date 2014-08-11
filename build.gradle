@@ -107,7 +107,7 @@ subprojects {
                     artifact sourcesJar
                     artifact javadocJar
                 }
-                if (testResultsZip.archivePath) {
+                if (testResultsZip.archivePath.exists()) {
                     artifact testResultsZip
                 }
 
