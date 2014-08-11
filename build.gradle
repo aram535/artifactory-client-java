@@ -1,3 +1,4 @@
+import static org.gradle.api.tasks.testing.TestResult.ResultType.SUCCESS
 import static java.lang.System.getenv
 
 buildscript {
@@ -33,7 +34,6 @@ artifactoryPublish.skip = true
 subprojects {
     apply plugin: 'java'
 
-
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
 
@@ -67,13 +67,28 @@ subprojects {
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'
-        from destinationDir
+        from javadoc.destinationDir
     }
 
-    // add javadoc/source jar tasks as artifacts
-    artifacts {
-        archives sourcesJar, javadocJar, jar
+    task testResultsZip(type: Zip) {
+        classifier = 'testreports'
+        from testReportDir
+
     }
+
+    test {
+        finalizedBy(testResultsZip)
+        project.ext.testsPass = true
+        ignoreFailures = true // we need to deploy the zip results anyhow
+        afterSuite { testDescriptor, testResult ->
+            project.ext.testsPass = testResult.resultType
+        }
+    }
+
+// add javadoc/source jar tasks as artifacts
+//    artifacts {
+//        archives sourcesJar, javadocJar, jar, testResultsZip
+//    }
 
     test {
         useTestNG()
@@ -87,9 +102,12 @@ subprojects {
     publishing {
         publications {
             main(MavenPublication) {
-                from components.java
-                artifact sourcesJar
-                artifact javadocJar
+                if (project.ext.testsPass == SUCCESS) {
+                    from components.java
+                    artifact sourcesJar
+                    artifact javadocJar
+                }
+                artifact testResultsZip
 
                 pom.withXml {
                     asNode().with {
