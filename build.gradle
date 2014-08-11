@@ -1,5 +1,5 @@
-import static org.gradle.api.tasks.testing.TestResult.ResultType.SUCCESS
 import static java.lang.System.getenv
+import static org.gradle.api.tasks.testing.TestResult.ResultType.SUCCESS
 
 buildscript {
     repositories {
@@ -107,7 +107,9 @@ subprojects {
                     artifact sourcesJar
                     artifact javadocJar
                 }
-                artifact testResultsZip
+                if (testResultsZip.archivePath) {
+                    artifact testResultsZip
+                }
 
                 pom.withXml {
                     asNode().with {
