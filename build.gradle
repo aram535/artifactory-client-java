@@ -77,31 +77,24 @@ subprojects {
     }
 
     test {
+        useTestNG()
         finalizedBy(testResultsZip)
-        project.ext.testsPass = true
+        testLogging {
+            exceptionFormat "full"
+            events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+            minGranularity 0
+        }
+        project.ext.testsPass = SUCCESS
         ignoreFailures = true // we need to deploy the zip results anyhow
         afterSuite { testDescriptor, testResult ->
             project.ext.testsPass = testResult.resultType
         }
     }
 
-// add javadoc/source jar tasks as artifacts
-//    artifacts {
-//        archives sourcesJar, javadocJar, jar, testResultsZip
-//    }
-
-    test {
-        useTestNG()
-        testLogging {
-            exceptionFormat "full"
-            events "started", "passed", "skipped", "failed", "standardOut", "standardError"
-            minGranularity 0
-        }
-    }
-
     publishing {
         publications {
             main(MavenPublication) {
+                println project.ext.testsPass
                 if (project.ext.testsPass == SUCCESS) {
                     from components.java
                     artifact sourcesJar
