@@ -1,5 +1,4 @@
 import static java.lang.System.getenv
-import static org.gradle.api.tasks.testing.TestResult.ResultType.SUCCESS
 
 buildscript {
     repositories {
@@ -84,22 +83,14 @@ subprojects {
             events "started", "passed", "skipped", "failed", "standardOut", "standardError"
             minGranularity 0
         }
-        project.ext.testsPass = SUCCESS
-        ignoreFailures = true // we need to deploy the zip results anyhow
-        afterSuite { testDescriptor, testResult ->
-            project.ext.testsPass = testResult.resultType
-        }
     }
 
     publishing {
         publications {
             main(MavenPublication) {
-                println project.ext.testsPass
-                if (project.ext.testsPass == SUCCESS) {
-                    from components.java
-                    artifact sourcesJar
-                    artifact javadocJar
-                }
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
                 if (testResultsZip.archivePath.exists()) {
                     artifact testResultsZip
                 }
