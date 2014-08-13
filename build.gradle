@@ -25,21 +25,6 @@ allprojects {
 
     artifactory {
         contextUrl = 'https://oss.jfrog.org'
-    }
-}
-
-artifactoryPublish.skip = true
-
-subprojects {
-    apply plugin: 'java'
-
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
-
-    final env = getenv()
-
-    artifactory {
-        contextUrl = 'https://oss.jfrog.org'
         resolve {
             repository {
                 repoKey = 'libs-release'
@@ -58,6 +43,16 @@ subprojects {
             }
         }
     }
+}
+
+artifactoryPublish.skip = true
+
+subprojects {
+    apply plugin: 'java'
+
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+
 
     task sourcesJar(type: Jar, dependsOn: classes) {
         classifier = 'sources'

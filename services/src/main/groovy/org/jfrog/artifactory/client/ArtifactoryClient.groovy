@@ -6,6 +6,11 @@ import groovyx.net.http.RESTClient
 import org.apache.http.entity.InputStreamEntity
 import org.jfrog.artifactory.client.impl.ArtifactoryImpl
 
+import static org.apache.http.auth.params.AuthPNames.TARGET_AUTH_PREF
+import static org.apache.http.client.params.AuthPolicy.BASIC
+import static org.apache.http.client.params.CookiePolicy.IGNORE_COOKIES
+import static org.apache.http.client.params.HttpClientParams.setCookiePolicy
+
 /**
  * @author jbaruch
  * @since 12/08/12
@@ -13,9 +18,9 @@ import org.jfrog.artifactory.client.impl.ArtifactoryImpl
 public class ArtifactoryClient {
 
     static Artifactory create(String url, String username = null, String password = null) {
-        def matcher = url=~/(https?:\/\/[^\/]+)\/+([^\/]*).*/
+        def matcher = url =~ /(https?:\/\/[^\/]+)\/+([^\/]*).*/
         if (!matcher) {
-            matcher = url=~/(https?:\/\/[^\/]+)\/*()/
+            matcher = url =~ /(https?:\/\/[^\/]+)\/*()/
             if (!matcher) {
                 throw new IllegalArgumentException("Invalid Artifactory URL: ${url}.")
             }
@@ -50,9 +55,13 @@ public class ArtifactoryClient {
         client.encoders = er
 
         client.headers.'User-Agent' = 'Artifactory-Client/1.0'
-        //TODO (JB) remove preemptive auth once RTFACT-5119 is fixed
+        def params = client.client.getParams()
+        setCookiePolicy params, IGNORE_COOKIES
         if (username && password) {
+            params.setParameter(TARGET_AUTH_PREF, [BASIC]);
             client.auth.basic username, password
+            //always need preemptive, there are resources that do no challenge and send another response
+            //(e.g. list of plugins returns empty list if not authenticated, without challenging.
             client.headers.Authorization = "Basic ${"$username:$password".toString().bytes.encodeBase64()}"
         }
         Artifactory artifactory = new ArtifactoryImpl(client, matcher[0][2])
