@@ -1,7 +1,7 @@
 artifactory-client-java
 =======================
 
-Artifactory REST Client Java API bindings
+Artifactory REST Client Java API bindings. No much docs. Read [the tests](https://github.com/jbaruch/artifactory-client-java/tree/master/services/src/test/java/org/jfrog/artifactory/client).
 
 [ ![Download](https://api.bintray.com/packages/jfrog/artifactory-tools/artifactory-client-java/images/download.png) ](https://bintray.com/jfrog/artifactory-tools/artifactory-client-java/_latestVersion)
 
